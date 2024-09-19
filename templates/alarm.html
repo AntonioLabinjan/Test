@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Alarm with Mood</title>
+    <style>
+        body {
+            background-color: #2c2c2c;
+            color: #f1f1f1;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #444;
+            color: #fff;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #5cb85c;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #4cae4c;
+        }
+        #countdown {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+        #song-info {
+            margin-top: 20px;
+        }
+        .dropdown {
+            position: fixed; 
+            top: 20px; 
+            right: 85px; 
+            z-index: 1000;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #1d1f21;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+
+        .dropdown-content button {
+            color: #f0f0f0;
+            padding: 12px 16px;
+            text-align: center;
+            background-color: #2d2f33;
+            border: none;
+            display: block;
+            width: 100%;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .dropdown-content button:hover {
+            background-color: #3a3d41;
+            transform: scale(1.05);
+        }
+
+        .dropdown:focus-within .dropdown-content {
+            display: block;
+        }
+
+        .dropbtn {
+            background-color: #2d2f33;
+            color: #f0f0f0;
+            padding: 12px 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .dropbtn:hover {
+            background-color: #3a3d41;
+            transform: scale(1.05);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="dropdown">
+        <button class="dropbtn">Menu</button>
+        <div class="dropdown-content">
+            <button onclick="window.location.href='/';">Home</button>
+            <button onclick="window.location.href='/recommendation_history';">View Recommendation History</button>
+            <button onclick="window.location.href='/mood_playlists';">View Mood Playlists</button>
+            <button onclick="window.location.href='/survey';">Take a Personalization Survey</button>
+            <button onclick="window.location.href='/emotion_chart';">Emotion Chart</button>
+            <button onclick="window.location.href='/set_alarm';">Alarm</button>
+        </div>
+    </div>
+    <div class="container">
+        <h1>Set an Alarm with Mood</h1>
+        <form id="alarmForm">
+            <div class="form-group">
+                <label for="date">Alarm Date:</label>
+                <input type="date" id="date" name="date" required>
+            </div>
+            <div class="form-group">
+                <label for="time">Alarm Time:</label>
+                <input type="time" id="time" name="time" required>
+            </div>
+            <div class="form-group">
+                <label for="mood">Select Mood:</label>
+                <select id="mood" name="mood" required>
+                    <option value="happy">Happy</option>
+                    <option value="sad">Sad</option>
+                    <option value="angry">Angry</option>
+                    <option value="neutral">Neutral</option>
+                </select>
+            </div>
+            <button type="submit">Set Alarm</button>
+        </form>
+
+        <div id="countdown"></div>
+        <div id="song-info"></div>
+    </div>
+
+    <script>
+        // Handle form submission for setting an alarm
+        document.getElementById('alarmForm').onsubmit = async function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const date = document.getElementById('date').value;
+            const time = document.getElementById('time').value;
+            const alarmDateTime = `${date} ${time}:00`;
+            const mood = document.getElementById('mood').value;
+
+            try {
+                const response = await fetch('/set_alarm', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `date=${encodeURIComponent(date)}&time=${encodeURIComponent(time)}&mood=${encodeURIComponent(mood)}`
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    startCountdown(alarmDateTime, mood);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        };
+
+        function startCountdown(alarmTimeStr, mood) {
+            const alarmTime = new Date(alarmTimeStr).getTime();
+            const countdownElem = document.getElementById('countdown');
+            const songInfoElem = document.getElementById('song-info');
+
+            const countdownInterval = setInterval(() => {
+                const now = new Date().getTime();
+                const distance = alarmTime - now;
+
+                if (distance < 0) {
+                    clearInterval(countdownInterval);
+                    countdownElem.textContent = "Alarm triggered!";
+
+                    // Periodically check for song info
+                    const checkSongInfo = async () => {
+                        try {
+                            const response = await fetch('/get_song_info');
+                            const songData = await response.json();
+                            if (response.ok && songData) {
+                                songInfoElem.innerHTML = `
+                                    <h3>Recommended Song for ${mood} mood:</h3>
+                                    <p><strong>Name:</strong> ${songData.name}</p>
+                                    <p><strong>Artist:</strong> ${songData.artist}</p>
+                                    <p><strong>Album:</strong> ${songData.album}</p>
+                                    <p><strong>Release Date:</strong> ${songData.release_date}</p>
+                                    <a href="${songData.youtube_link}" target="_blank">Listen on YouTube</a>
+                                `;
+                            } else {
+                                songInfoElem.textContent = "Error fetching song.";
+                            }
+                        } catch (error) {
+                            songInfoElem.textContent = "Error fetching song.";
+                        }
+                    };
+
+                    checkSongInfo();
+                } else {
+                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                    countdownElem.textContent = `Time until alarm: ${hours}h ${minutes}m ${seconds}s`;
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

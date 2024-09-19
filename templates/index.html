@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion and Song Recommendation</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #1d1f21;
+            color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            transition: background-color 0.5s ease;
+        }
+        
+        h1, h2 {
+            color: #e8e8e8;
+            text-align: center;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+        
+        #face-capture {
+            margin-top: 40px;
+            text-align: center;
+        }
+    
+        #video {
+            width: 40%;  
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+    
+        #capture-button {
+            margin-top: 20px;
+            padding: 12px 20px;
+            font-size: 16px;
+            background-color: #2d2f33;
+            color: #f0f0f0;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+    
+        #capture-button:hover {
+            background-color: #3a3d41;
+            transform: scale(1.05);
+        }
+    
+        p {
+            font-size: 18px;
+            margin: 10px 0;
+            color: #bdbdbd;
+        }
+    
+        #emotion {
+            font-size: 22px;
+            color: #9e9e9e;
+            font-weight: bold;
+        }
+    
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 1s forwards;
+        }
+    
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+    
+        #song-card {
+            display: none;
+            background-color: #2c3e50;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+            width: 60%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            transition: opacity 0.3s;
+        }
+        
+        #song-card.show {
+            display: block;
+            opacity: 1;
+        }
+        
+        #song-card p {
+            font-size: 18px;
+            color: #ecf0f1;
+            margin: 8px 0;
+        }
+        
+        #song-card #youtube-link {
+            display: block;
+            margin-top: 15px;
+            padding: 12px 20px;
+            font-size: 16px;
+            color: white;
+            text-decoration: none;
+            background-color: #4CAF50;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        
+        #song-card #youtube-link:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        /* YouTube Player Container */
+        #youtube-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 */
+            padding-top: 25px;
+            height: 0;
+            margin-top: 20px;
+            display: none; /* Hidden by default */
+        }
+
+        #youtube-player {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        #embed-error-message {
+            color: red;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* Dropdown Styles */
+        .dropdown {
+            position: fixed; 
+            top: 20px; 
+            right: 85px; 
+            z-index: 1000;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #1d1f21;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+
+        .dropdown-content button {
+            color: #f0f0f0;
+            padding: 12px 16px;
+            text-align: center;
+            background-color: #2d2f33;
+            border: none;
+            display: block;
+            width: 100%;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .dropdown-content button:hover {
+            background-color: #3a3d41;
+            transform: scale(1.05);
+        }
+
+        .dropdown:focus-within .dropdown-content {
+            display: block;
+        }
+
+        .dropbtn {
+            background-color: #2d2f33;
+            color: #f0f0f0;
+            padding: 12px 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .dropbtn:hover {
+            background-color: #3a3d41;
+            transform: scale(1.05);
+        }
+
+        .modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent background */
+    transition: opacity 0.5s ease;
+}
+
+.modal-content {
+    background-color: #2d2f33;
+    margin: 15% auto;
+    padding: 20px;
+    border-radius: 12px;
+    width: 80%;
+    max-width: 600px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    color: #f0f0f0;
+}
+
+.modal-content p {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.close {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 25px;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: #f0f0f0;
+}
+    </style>
+    <!-- Load YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+</head>
+<body>
+    <h1>Emotion and Song Recommendation</h1>
+    
+    <!-- Face capture section -->
+    <div id="face-capture">
+        <h2>Capture Your Face Emotion</h2>
+        <video id="video" autoplay></video>
+        <br>
+        <button id="capture-button">Emotion Analysis</button>
+    </div>
+    
+    <!-- Display recommended song as a card -->
+    <div id="song-card">
+        <h2>Recommended Song</h2>
+        <p id="emotion"></p>
+        <p id="song-name"></p>
+        <p id="song-artist"></p>
+        <p id="song-album"></p>
+        <p id="song-release-date"></p>
+        <a id="youtube-link" href="" target="_blank">Watch on YouTube</a>
+        
+        <!-- YouTube Player Container -->
+        <div id="youtube-container">
+            <div id="player"></div>
+        </div>
+        
+        <!-- Embed Error Message -->
+        <p id="embed-error-message">This video cannot be embedded. Please <a id="open-in-new-tab" href="" target="_blank">open it in a new tab</a>.</p>
+
+        <div id="motivational-popup" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <p id="motivational-message"></p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dropdown Navigation -->
+    <div class="dropdown">
+        <button class="dropbtn">Menu</button>
+        <div class="dropdown-content">
+            <button onclick="window.location.href='/';">Home</button>
+            <button onclick="window.location.href='/recommendation_history';">View Recommendation History</button>
+            <button onclick="window.location.href='/mood_playlists';">View Mood Playlists</button>
+            <button onclick="window.location.href='/survey';">Take a Personalization Survey</button>
+            <button onclick="window.location.href='/emotion_chart';">Emotion Chart</button>
+            <button onclick="window.location.href='/set_alarm';">Alarm</button>
+        </div>
+    </div>
+    
+    <script>
+        const moodColors = {
+            happy: "#FFD700",
+            sad: "#2F4F4F",
+            neutral: "#1d1f21",
+            angry: "#FF3939"
+        };
+
+        let player; // YouTube player
+
+        // Initialize YouTube IFrame API
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '315',
+                width: '560',
+                videoId: '', // Will be set dynamically
+                events: {
+                    'onReady': onPlayerReady,
+                    'onError': onPlayerError
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            // Player is ready
+        }
+
+        function onPlayerError(event) {
+            console.error("YouTube Player Error:", event.data);
+            // Hide the player and show the error message
+            document.getElementById('youtube-container').style.display = 'none';
+            document.getElementById('embed-error-message').style.display = 'block';
+        }
+
+        // Access the camera and start playing the video stream
+        async function initCamera() {
+    const video = document.getElementById('video');
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+        video.play();
+    } catch (error) {
+        console.error("Error accessing the camera: ", error);
+        if (isMobile()) {
+            alert("Your device or browser does not support camera access. Please try using a different device or browser (preferably Chrome or Firefox with permissions enabled).");
+        } else {
+            alert("Cannot access the camera. Please allow camera access or use a different device.");
+        }
+    }
+}
+
+// Initialize the camera on page load
+function isMobile() {
+    return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
+window.onload = function() {
+    initCamera();
+
+    // Ensure permission prompt for camera use on mobile or restricted devices
+    navigator.permissions.query({ name: 'camera' }).then(function(result) {
+        if (result.state !== 'granted') {
+            alert("Please allow camera access to use the emotion detection feature.");
+        }
+    }).catch(function(error) {
+        console.error("Permission query error: ", error);
+    });
+};
+
+        // Handle capturing a frame from the video
+        document.getElementById('capture-button').addEventListener('click', async () => {
+            const video = document.getElementById('video');
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            const base64Image = canvas.toDataURL('image/jpeg').split(',')[1];
+            const response = await fetch('/analyze_frame', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ image: `data:image/jpeg;base64,${base64Image}` }),
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                const songCard = document.getElementById('song-card');
+                songCard.classList.add('show');
+                
+                document.getElementById('emotion').textContent = `Emotion Detected: ${data.emotion}`;
+                
+                // Update the background color based on emotion
+                if (data.emotion in moodColors) {
+                    document.body.style.backgroundColor = moodColors[data.emotion];
+                } else {
+                    document.body.style.backgroundColor = moodColors.neutral;
+                }
+                
+                if (data.show_motivational_popup) {
+            showMotivationalPopup(data.motivational_message);
+                 }
+
+                if (data.recommended_song === 'No songs found for this mood.') {
+                    document.getElementById('song-name').textContent = data.recommended_song;
+                    document.getElementById('song-artist').textContent = '';
+                    document.getElementById('song-album').textContent = '';
+                    document.getElementById('song-release-date').textContent = '';
+                    document.getElementById('youtube-link').style.display = 'none';
+                    document.getElementById('youtube-container').style.display = 'none';
+                    document.getElementById('embed-error-message').style.display = 'none';
+                } else {
+                    document.getElementById('song-name').textContent = `Song: ${data.recommended_song.name}`;
+                    document.getElementById('song-artist').textContent = `Artist: ${data.recommended_song.artist}`;
+                    document.getElementById('song-album').textContent = `Album: ${data.recommended_song.album}`;
+                    document.getElementById('song-release-date').textContent = `Release Date: ${data.recommended_song.release_date}`;
+                    
+                    const youtubeLink = data.recommended_song.youtube_link;
+                    document.getElementById('youtube-link').href = youtubeLink;
+                    document.getElementById('open-in-new-tab').href = youtubeLink;
+                    
+                    // Extract the YouTube video ID from the link
+                    const videoIdMatch = youtubeLink.match(/(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([^&]+)/);
+                    const videoId = videoIdMatch ? videoIdMatch[1] : null;
+                    
+                    if (videoId) {
+                        // Hide any previous error messages
+                        document.getElementById('embed-error-message').style.display = 'none';
+                        document.getElementById('youtube-container').style.display = 'block';
+                        
+                        // Load the video into the YouTube player
+                        player.loadVideoById(videoId);
+                    } else {
+                        // If video ID cannot be extracted, show error message
+                        document.getElementById('youtube-container').style.display = 'none';
+                        document.getElementById('embed-error-message').style.display = 'block';
+                    }
+                }
+            } else {
+                console.error("Error from server:", data.error);
+                alert(`Error: ${data.error}`);
+            }
+        });
+
+        function showMotivationalPopup(message) {
+    const modal = document.getElementById('motivational-popup');
+    const closeBtn = document.querySelector('.close');
+    const messageElement = document.getElementById('motivational-message');
+
+    // Set the message and show the modal
+    messageElement.textContent = message;
+    modal.style.display = 'block';
+
+    // Close the modal when the close button is clicked
+    closeBtn.onclick = function() {
+        modal.style.display = 'none';
+    }
+
+    // Close the modal when the user clicks anywhere outside of it
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    }
+};
+        // Initialize the camera on page load
+        window.onload = initCamera;
+    </script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alarm Result</title>
+    <style>
+        body {
+            background-color: #2c2c2c;
+            color: #f1f1f1;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        p {
+            margin-bottom: 10px;
+        }
+        a {
+            color: #5cb85c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Alarm Triggered!</h1>
+        {% if song_info.error %}
+            <p>Error fetching song: {{ song_info.error }}</p>
+        {% else %}
+            <h2>Recommended Song for {{ song_info.mood }} mood:</h2>
+            <p><strong>Name:</strong> {{ song_info.name }}</p>
+            <p><strong>Artist:</strong> {{ song_info.artist }}</p>
+            <p><strong>Album:</strong> {{ song_info.album }}</p>
+            <p><strong>Release Date:</strong> {{ song_info.release_date }}</p>
+            <a href="{{ song_info.youtube_link }}" target="_blank">Listen on YouTube</a>
+        {% endif %}
+    </div>
+    <div>
+        <audio id="alarmSound" autoplay>
+            <source src="{{ url_for('static', filename='sounds/sound.mp3') }}" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+    </div>
+    <script>
+        // Play the sound when the alarm triggers
+        var alarmSound = document.getElementById("alarmSound");
+        alarmSound.play();
+    </script>
+</body>
+</html>

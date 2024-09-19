@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mood-Based Playlists</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #1d1f21;
+            color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #e8e8e8;
+            text-align: center;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 40px;
+        }
+
+        .mood-section {
+            margin-bottom: 30px;
+        }
+
+        .mood-title {
+            font-size: 24px;
+            color: #ffcc00;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .song-list {
+            display: none;
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .song-item {
+            font-size: 18px;
+            margin: 5px 0;
+            color: #f0f0f0;
+        }
+
+        .youtube-link {
+            color: #2196F3;
+            text-decoration: none;
+        }
+
+        .youtube-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Dropdown Styles */
+        .dropdown {
+            position: fixed; 
+            top: 20px; 
+            right: 85px; 
+            z-index: 1000;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #1d1f21;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+
+        .dropdown-content button {
+            color: #f0f0f0;
+            padding: 12px 16px;
+            text-align: center;
+            background-color: #2d2f33;
+            border: none;
+            display: block;
+            width: 100%;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .dropdown-content button:hover {
+            background-color: #3a3d41;
+            transform: scale(1.05);
+        }
+
+        .dropdown:focus-within .dropdown-content {
+            display: block;
+        }
+
+        .dropbtn {
+            background-color: #2d2f33;
+            color: #f0f0f0;
+            padding: 12px 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .dropbtn:hover {
+            background-color: #3a3d41;
+            transform: scale(1.05);
+        }
+    </style>
+    <script>
+        // Toggle dropdown visibility for songs of a specific mood
+        function toggleSongs(mood) {
+            const songList = document.getElementById(mood + '-songs');
+            songList.style.display = songList.style.display === 'none' ? 'block' : 'none';
+        }
+    </script>
+</head>
+<body>
+    <div class="dropdown">
+        <button class="dropbtn">Menu</button>
+        <div class="dropdown-content">
+            <button onclick="window.location.href='/';">Home</button>
+            <button onclick="window.location.href='/recommendation_history';">View Recommendation History</button>
+            <button onclick="window.location.href='/mood_playlists';">View Mood Playlists</button>
+            <button onclick="window.location.href='/survey';">Take a Personalization Survey</button>
+            <button onclick="window.location.href='/emotion_chart';">Emotion Chart</button>
+            <button onclick="window.location.href='/set_alarm';">Alarm</button>
+        </div>
+    </div>
+    <h1>Mood-Based Playlists</h1>
+
+    {% for mood, songs in mood_playlists.items() %}
+    <div class="mood-section">
+        <h2 class="mood-title" onclick="toggleSongs('{{ mood }}')">{{ mood.capitalize() }} ▼</h2>
+        <ul id="{{ mood }}-songs" class="song-list">
+            {% for song in songs %}
+            <li class="song-item">
+                {{ song.name }} by {{ song.artist }} 
+                <a href="{{ song.youtube_link }}" target="_blank" class="youtube-link">[YouTube]</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endfor %}
+
+</body>
+</html>

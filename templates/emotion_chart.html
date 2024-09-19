@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Emotion Change Over Time</title>
+</head>
+<body>
+    <div class="dropdown">
+        <button class="dropbtn">Menu</button>
+        <div class="dropdown-content">
+            <button onclick="window.location.href='/recommendation_history';">View Recommendation History</button>
+            <button onclick="window.location.href='/mood_playlists';">View Mood Playlists</button>
+            <button onclick="window.location.href='/survey';">Take a Personalization Survey</button>
+            <button onclick="window.location.href='/emotion_chart';">Emotion Chart</button>
+            <button onclick="window.location.href='/set_alarm';">Alarm</button>
+        </div>
+    </div>
+    <center><h1>Emotion Change Over Time</h1></center>
+    <div>{{ graph_html|safe }}</div>
+</body>
+</html>
+<style>
+    body {
+        background-color: black;
+    }
+    h1{
+        color: white;
+    }
+    /* Dropdown Styles */
+    .dropdown {
+            position: fixed; 
+            top: 20px; 
+            right: 85px; 
+            z-index: 1000;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #1d1f21;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+
+        .dropdown-content button {
+            color: #f0f0f0;
+            padding: 12px 16px;
+            text-align: center;
+            background-color: #2d2f33;
+            border: none;
+            display: block;
+            width: 100%;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .dropdown-content button:hover {
+            background-color: #3a3d41;
+            transform: scale(1.05);
+        }
+
+        .dropdown:focus-within .dropdown-content {
+            display: block;
+        }
+
+        .dropbtn {
+            background-color: #2d2f33;
+            color: #f0f0f0;
+            padding: 12px 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .dropbtn:hover {
+            background-color: #3a3d41;
+            transform: scale(1.05);
+        }
+</style>

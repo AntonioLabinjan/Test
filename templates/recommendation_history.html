@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommendation History</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #1d1f21;
+            color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #e8e8e8;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #555;
+        }
+
+        th {
+            background-color: #333;
+        }
+
+        tr:hover {
+            background-color: #2c2c2c;
+        }
+
+        .add-to-playlist-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
+        /* Dropdown Styles */
+        .dropdown {
+            position: fixed; 
+            top: 20px; 
+            right: 85px; 
+            z-index: 1000;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #1d1f21;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+
+        .dropdown-content button {
+            color: #f0f0f0;
+            padding: 12px 16px;
+            text-align: center;
+            background-color: #2d2f33;
+            border: none;
+            display: block;
+            width: 100%;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .dropdown-content button:hover {
+            background-color: #3a3d41;
+            transform: scale(1.05);
+        }
+
+        .dropdown:focus-within .dropdown-content {
+            display: block;
+        }
+
+        .dropbtn {
+            background-color: #2d2f33;
+            color: #f0f0f0;
+            padding: 12px 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .dropbtn:hover {
+            background-color: #3a3d41;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="dropdown">
+        <button class="dropbtn">Menu</button>
+        <div class="dropdown-content">
+            <button onclick="window.location.href='/';">Home</button>
+            <button onclick="window.location.href='/recommendation_history';">View Recommendation History</button>
+            <button onclick="window.location.href='/mood_playlists';">View Mood Playlists</button>
+            <button onclick="window.location.href='/survey';">Take a Personalization Survey</button>
+            <button onclick="window.location.href='/emotion_chart';">Emotion Chart</button>
+            <button onclick="window.location.href='/set_alarm';">Alarm</button>
+        </div>
+    </div>
+    <h1>Recommendation History</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Song Name</th>
+                <th>Artist</th>
+                <th>Album</th>
+                <th>Release Date</th>
+                <th>Recommended At</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for song in recommended_songs %}
+            <tr>
+                <td>{{ song.name }}</td>
+                <td>{{ song.artist }}</td>
+                <td>{{ song.album }}</td>
+                <td>{{ song.release_date }}</td>
+                <td>{{ song.recommended_at }}</td>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
