@@ -660,7 +660,11 @@ def fetch_random_song(emotion):
 
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()  # This will create the tables in the database
-        if Song.query.count() == 0:  # Only load data if the table is empty
+        print("Initializing database...")
+        db.create_all()
+        if Song.query.count() == 0:
+            print("Loading CSV data...")
             load_csv_data()
-app.run(host = '0.0.0.0', port=8080, debug=False)
+        else:
+            print("Database already populated.")
+    app.run(host='0.0.0.0', port=8080, debug=False)
