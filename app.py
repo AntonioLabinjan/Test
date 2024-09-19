@@ -663,4 +663,4 @@ if __name__ == '__main__':
         db.create_all()  # This will create the tables in the database
         if Song.query.count() == 0:  # Only load data if the table is empty
             load_csv_data()
-app.run(host = '0.0.0.0', port=4000, debug=True)
+app.run(host = '0.0.0.0', port=8080, debug=False)
